@@ -1,7 +1,7 @@
-import express from 'express';
-import sequelize from '../utils/dbConnection.js';
+import express, { raw } from 'express';
+import sequelize from '../utils/dbConnection.ts';
 
-import { Book, Shelf } from "../models/sqlTablesModels.js";
+import { Book, Shelf } from "../models/sqlTablesModels.ts";
 
 const router = express.Router();
 
@@ -10,20 +10,21 @@ router.post('/', async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
     const { shelfIds, ...bookData } = req.body;
-    const newBook = await Book.create(bookData, { transaction: t });
+    const book = await Book.create(bookData, { transaction: t });
+    console.log('Created Book:', book);
 
     if (shelfIds && shelfIds.length > 0) {
       const shelves = await Promise.all(
         shelfIds.map(id => sequelize.models.Shelf.findByPk(id, { transaction: t }))
       );
-      await newBook.addShelves(shelves, { transaction: t });
+      await book.addShelves(shelves, { transaction: t });
     }
 
     await t.commit();
-    const createdBook = await Book.findByPk(newBook.id, {
+    const createdBook = await Book.findByPk(book.id, {
       include: [{ model: Shelf, as: 'shelves' }]
     });
-    res.status(200).json(createdBook);
+    res.status(201).json(createdBook);
   } catch (error) {
     await t.rollback();
     next(error);
@@ -99,6 +100,10 @@ router.delete('/:bookId/shelves/:shelfId', async (req, res, next) => {
 
     if (!book || !shelf) {
       return res.status(404).json({ error: 'Book or Shelf not found' });
+    }
+
+    if(!await book.hasShelf(shelf)){
+      return res.status(400).json({ error: 'Book is not on the specified shelf' });
     }
 
     await book.removeShelf(shelf);

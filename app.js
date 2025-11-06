@@ -1,7 +1,7 @@
 import express from 'express';
 import { Sequelize } from 'sequelize';
 
-import sequelize from './utils/dbConnection.js';
+import sequelize from './utils/dbConnection.ts';
 import commentsRouter from './routes/comments.js';
 import moviesRouter from './routes/movies.js';
 import authorsRouter from './routes/authors.js';

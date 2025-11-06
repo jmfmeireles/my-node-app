@@ -1,7 +1,7 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
 
-import db from '../utils/mongoConnection.js';
+import db from '../utils/mongoConnection.ts';
 
 
 const router = express.Router();

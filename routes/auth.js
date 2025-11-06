@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import User from "../models/user.js";
+import User from "../models/user.ts";
 import crypto from "node:crypto";
 
 const router = express.Router();
@@ -11,7 +11,7 @@ router.post("/register", async (req, res, next) => {
     // Registration logic here
     const { username, password } = req.body;
     //password must be at least 6 characters
-    if (password.length < 6) {
+    if (!password || password.length < 6) {
       return res
         .status(400)
         .json({ error: "Password must be at least 6 characters long" });
@@ -36,7 +36,8 @@ router.post("/login", async (req, res, next) => {
   try {
     // Login logic here
     const { username, password } = req.body;
-    const user = await User.findOne({ where: { username } });
+    const user = await User.findOne({ where: { username }, raw: true });
+    
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -55,6 +56,15 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+router.get("/users", async (req, res, next) => {
+  try {
+    const users = await User.findAll({ attributes: ["id", "username"] });
+    res.status(200).json({ users });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/logout", (req, res, next) => {
   req.session.destroy((err) => {
     if (err) return next(err);
@@ -62,6 +72,7 @@ router.post("/logout", (req, res, next) => {
     res.status(200).json({ message: "Logout successful" });
   });
 });
+
 
 const authenticationSession = (req, res, next) => {
   if (req.session.user) {

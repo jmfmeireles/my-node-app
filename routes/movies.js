@@ -1,7 +1,7 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
 
-import db from '../utils/mongoConnection.js';
+import db from '../utils/mongoConnection.ts';
 
 
 const router = express.Router();
@@ -109,9 +109,15 @@ router.delete('/:id', async (req, res, next) => {
     }
 
     // Delete associated comments
-    await db.collection('comments').deleteMany({ movie_id: new ObjectId(movieId) });
+    const deleteResult = await db.collection('comments').deleteMany({ movie_id: new ObjectId(movieId) });
+    const deletedCount = deleteResult.deletedCount;
 
-    res.status(200).json({ message: 'Movie and associated comments deleted successfully' });
+    //adjust response message based on whether comments were deleted
+    let message = 'Movie deleted.';
+    if (deletedCount > 0) {
+      message += ` Also deleted ${deletedCount} associated comment(s).`;
+    }
+    res.status(200).json({ message });
   } catch (error) {
     next(error);
   }
