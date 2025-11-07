@@ -1,6 +1,9 @@
 
-import sequelize from './dbConnection.ts';
-import { Author, Book, Profile, Shelf } from "../models/sqlTablesModels.ts";
+import sequelize from '../config/db.ts';
+import { Author } from '../models/author.model.ts';
+import { Book } from '../models/book.model.ts';
+import { Profile } from '../models/profile.model.ts';
+import { Shelf } from '../models/shelf.model.ts';
 
 
 const seedDatabase = async () => {

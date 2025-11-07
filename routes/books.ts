@@ -1,6 +1,8 @@
 import express, { type Request, type Response, type NextFunction } from 'express';
-import sequelize from '../utils/dbConnection.ts';
-import { Author, Book, Shelf, type CreateUpdateBookAttributes } from "../models/sqlTablesModels.ts";
+import sequelize from '../config/db.ts';
+import { Author } from '../models/author.model.ts';
+import { Book, type CreateUpdateBookAttributes } from '../models/book.model.ts';
+import { Shelf } from '../models/shelf.model.ts';
 
 const router = express.Router();
 
@@ -51,6 +53,18 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
       include: [{ model: Shelf, as: 'shelves' }]
     });
     res.status(200).json(books);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// get all the shelves with their books
+router.get('/shelves-with-books', async (_: Request, res: Response, next: NextFunction) => {
+  try {
+    const shelves: Shelf[] = await Shelf.findAll({
+      include: [{ model: Book, as: 'books' }]
+    });
+    res.status(200).json(shelves);
   } catch (error) {
     next(error);
   }
@@ -173,16 +187,5 @@ router.get('/:id/shelves', async (req: Request<{ id: string }>, res: Response, n
   }
 });
 
-// get all the shelves with their books
-router.get('/shelves-with-books', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const shelves: Shelf[] = await Shelf.findAll({
-      include: [{ model: Book, as: 'books' }]
-    });
-    res.status(200).json(shelves);
-  } catch (error) {
-    next(error);
-  }
-});
 
 export default router;

@@ -1,6 +1,6 @@
 import express, { type Request, type Response, type NextFunction } from "express";
 import bcrypt from "bcrypt";
-import User, { type UserCreationAttributes } from "../models/user.ts";
+import User, { type UserCreationAttributes } from "../models/user.model.ts";
 import crypto from "node:crypto";
 
 const router = express.Router();

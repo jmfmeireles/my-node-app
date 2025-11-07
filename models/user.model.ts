@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import type { Optional } from "sequelize";
-import sequelize from "../utils/dbConnection.ts";
+import sequelize from "../config/db.ts";
 
 interface UserAttributes {
     id?: number;

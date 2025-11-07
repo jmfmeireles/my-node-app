@@ -17,5 +17,5 @@ try {
     console.error(error);
 }
 
-const db = connection.db('sample_mflix');
+const db = connection?.db('sample_mflix');
 export default db;

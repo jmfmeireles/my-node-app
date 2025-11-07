@@ -4,13 +4,10 @@ import express, {
   type NextFunction,
 } from "express";
 import { Sequelize } from "sequelize";
-import sequelize from "../utils/dbConnection.ts";
-import {
-  Author,
-  Book,
-  Profile,
-  type CreateUpdateAuthorAttributes,
-} from "../models/sqlTablesModels.ts";
+import sequelize from "../config/db.ts";
+import { Author, type CreateUpdateAuthorAttributes } from "../models/author.model.ts";
+import { Profile } from "../models/profile.model.ts";
+import { Book } from "../models/book.model.ts";
 
 const router = express.Router();
 

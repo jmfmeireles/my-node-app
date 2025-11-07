@@ -1,6 +1,6 @@
 import express, {type  Request, type Response, type NextFunction } from 'express';
 import { ValidationError } from 'sequelize';
-import sequelize from './utils/dbConnection.ts';
+import sequelize from './config/db.ts';
 import commentsRouter from './routes/comments.ts';
 import moviesRouter from './routes/movies.ts';
 import authorsRouter from './routes/authors.ts';
@@ -19,6 +19,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false } // Set to true if using HTTPS
 }));
+
 
 app.use('/comments', commentsRouter);
 app.use('/movies', moviesRouter);
