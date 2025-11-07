@@ -1,15 +1,14 @@
-import express from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import { ObjectId } from 'mongodb';
-
 import db from '../utils/mongoConnection.ts';
-
+import type { Comment } from '../models/movies.ts';
 
 const router = express.Router();
 
 // all comments
-router.get('/', async (req, res, next) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const comments = await db.collection('comments').find({}).toArray();
+    const comments: Comment[] = await db.collection('comments').find({}).toArray() as Comment[];
     res.status(200).json(comments);
   } catch (error) {
     next(error);
@@ -17,17 +16,17 @@ router.get('/', async (req, res, next) => {
 });
 
 // get comments paginated
-router.get('/paginated', async (req, res, next) => {
+router.get('/paginated', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const comments = await db.collection('comments')
+    const comments: Comment[] = await db.collection('comments')
       .find({})
       .skip(skip)
       .limit(limit)
-      .toArray();
+      .toArray() as Comment[];
 
     res.status(200).json(comments);
   } catch (error) {
@@ -35,24 +34,23 @@ router.get('/paginated', async (req, res, next) => {
   }
 });
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const commentId = req.params.id;
-    const comment = await db.collection('comments').findOne({ _id: new ObjectId(commentId) });
+    const comment: Comment | null = await db.collection('comments').findOne({ _id: new ObjectId(commentId) }) as Comment | null;
     if (!comment) {
       return res.status(404).json({ error: 'Comment not found' });
     }
     res.status(200).json(comment);
-    
   } catch (error) {
     next(error);
   }
 });
 
 // Insert One
-router.post('/', async (req, res, next) => {
+router.post('/', async (req: Request<{}, {}, Comment>, res: Response, next: NextFunction) => {
   try {
-    const newComment = req.body;
+    const newComment: Comment = req.body;
     const result = await db.collection('comments').insertOne({
       name: newComment.name,
       email: newComment.email,
@@ -68,11 +66,11 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-//update comment by id
-router.put('/:id', async (req, res, next) => {
+// update comment by id
+router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const commentId = req.params.id;
-    const updatedData = req.body;
+    const updatedData: Partial<Comment> = req.body;
 
     const result = await db.collection('comments').updateOne(
       { _id: new ObjectId(commentId) },
@@ -93,7 +91,7 @@ router.put('/:id', async (req, res, next) => {
 });
 
 // delete comment by id
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const commentId = req.params.id;
 

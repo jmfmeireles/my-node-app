@@ -1,15 +1,14 @@
-import express from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import { ObjectId } from 'mongodb';
-
 import db from '../utils/mongoConnection.ts';
-
+import type { Movie, Comment } from '../models/movies.ts';
 
 const router = express.Router();
 
 // all movies
-router.get('/', async (req, res, next) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const movies = await db.collection('movies').find({}).toArray();
+    const movies: Movie[] = await db.collection('movies').find({}).toArray() as Movie[];
     res.status(200).json(movies);
   } catch (error) {
     next(error);
@@ -17,17 +16,17 @@ router.get('/', async (req, res, next) => {
 });
 
 // paginated movies
-router.get('/paginated', async (req, res, next) => {
+router.get('/paginated', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const movies = await db.collection('movies')
+    const movies: Movie[] = await db.collection('movies')
       .find({})
       .skip(skip)
       .limit(limit)
-      .toArray();
+      .toArray() as Movie[];
 
     res.status(200).json(movies);
   } catch (error) {
@@ -36,22 +35,22 @@ router.get('/paginated', async (req, res, next) => {
 });
 
 // get movie by id, with or without comments
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const movieId = req.params.id;
     const includeComments = req.query.includeComments === 'true';
 
-    const movie = await db.collection('movies').findOne({ _id: new ObjectId(movieId) });
+    const movie: Movie | null = await db.collection('movies').findOne({ _id: new ObjectId(movieId) }) as Movie | null;
 
     if (!movie) {
       return res.status(404).json({ error: 'Movie not found' });
     }
 
     if (includeComments) {
-      const comments = await db
+      const comments: Comment[] = await db
         .collection("comments")
         .find({ movie_id: new ObjectId(movieId) })
-        .toArray();
+        .toArray() as Comment[];
       movie.comments = comments;
     }
     
@@ -61,25 +60,23 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-//create movie
-router.post('/', async (req, res, next) => {
+// create movie
+router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const newMovie = req.body;
-    //no schema validation for simplicity
+    const newMovie: Movie = req.body;
     const result = await db.collection('movies').insertOne(newMovie);
-    //get created movie
-    const createdMovie = await db.collection('movies').findOne({ _id: result.insertedId });
+    const createdMovie: Movie | null = await db.collection('movies').findOne({ _id: result.insertedId }) as Movie | null;
     res.status(201).json(createdMovie);
   } catch (error) {
     next(error);
   }
 });
 
-//update movie
-router.put('/:id', async (req, res, next) => {
+// update movie
+router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const movieId = req.params.id;
-    const updatedData = req.body;
+    const updatedData: Partial<Movie> = req.body;
 
     const result = await db.collection('movies').updateOne(
       { _id: new ObjectId(movieId) },
@@ -90,15 +87,15 @@ router.put('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Movie not found' });
     }
 
-    const updatedMovie = await db.collection('movies').findOne({ _id: new ObjectId(movieId) });
+    const updatedMovie: Movie | null = await db.collection('movies').findOne({ _id: new ObjectId(movieId) }) as Movie | null;
     res.status(200).json(updatedMovie);
   } catch (error) {
     next(error);
   }
 });
 
-//delete movie and its comments
-router.delete('/:id', async (req, res, next) => {
+// delete movie and its comments
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const movieId = req.params.id;
 
@@ -108,11 +105,9 @@ router.delete('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Movie not found' });
     }
 
-    // Delete associated comments
     const deleteResult = await db.collection('comments').deleteMany({ movie_id: new ObjectId(movieId) });
     const deletedCount = deleteResult.deletedCount;
 
-    //adjust response message based on whether comments were deleted
     let message = 'Movie deleted.';
     if (deletedCount > 0) {
       message += ` Also deleted ${deletedCount} associated comment(s).`;

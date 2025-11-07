@@ -1,24 +1,20 @@
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import bcrypt from "bcrypt";
-import User from "../models/user.ts";
+import User, { type UserCreationAttributes } from "../models/user.ts";
 import crypto from "node:crypto";
 
 const router = express.Router();
 
-//register route
-router.post("/register", async (req, res, next) => {
+// Register route
+router.post("/register", async (req: Request<{}, {}, UserCreationAttributes>, res: Response, next: NextFunction) => {
   try {
-    // Registration logic here
     const { username, password } = req.body;
-    //password must be at least 6 characters
     if (!password || password.length < 6) {
       return res
         .status(400)
         .json({ error: "Password must be at least 6 characters long" });
     }
-    //encrypt password
     const passwordEncrypted = await bcrypt.hash(password, 10);
-    // Assume User is a Sequelize model
     const newUser = await User.create({
       username,
       password: passwordEncrypted,
@@ -31,13 +27,12 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-//login route
-router.post("/login", async (req, res, next) => {
+// Login route
+router.post("/login", async (req: Request<{}, {}, UserCreationAttributes>, res: Response, next: NextFunction) => {
   try {
-    // Login logic here
     const { username, password } = req.body;
     const user = await User.findOne({ where: { username }, raw: true });
-    
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -46,7 +41,7 @@ router.post("/login", async (req, res, next) => {
       return res.status(401).json({ error: "Password is wrong" });
     }
 
-    req.session.regenerate((err) => {
+    req.session.regenerate((err: Error) => {
       if (err) next(err);
       req.session.user = user.username;
       res.status(200).json({ message: "Login successful" });
@@ -56,25 +51,7 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get("/users", async (req, res, next) => {
-  try {
-    const users = await User.findAll({ attributes: ["id", "username"] });
-    res.status(200).json({ users });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.post("/logout", (req, res, next) => {
-  req.session.destroy((err) => {
-    if (err) return next(err);
-    res.clearCookie("connect.sid", { path: "/" });
-    res.status(200).json({ message: "Logout successful" });
-  });
-});
-
-
-const authenticationSession = (req, res, next) => {
+const authenticationSession = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.user) {
     next();
   } else {
@@ -82,28 +59,42 @@ const authenticationSession = (req, res, next) => {
   }
 };
 
-router.get("/protected", authenticationSession, (req, res) => {
+// Protected route
+router.get("/protected", authenticationSession, (req: Request, res: Response) => {
   if (!req.session.user) {
-    //give user three options: /login, /register, /authenticate
     return res.status(401).json({
       error: "Unauthorized!",
     });
   }
-  res.status(200).json({ message: `You have accessed a protected route with user ${req.session.user}` });
+  res
+    .status(200)
+    .json({
+      message: `You have accessed a protected route with user ${req.session.user}`,
+    });
+});
+
+// Logout route
+router.post("/logout", (req: Request, res: Response, next: NextFunction) => {
+  req.session.destroy((err: Error) => {
+    if (err) {
+      return next(err);
+    }
+    res.clearCookie("connect.sid");
+    res.status(200).json({ message: "Logout successful" });
+  });
 });
 
 /***************************oauth 2 with google *****************************/
-
-router.get("/authenticate", (req, res) => {
+router.get("/authenticate", (req: Request, res: Response) => {
   const state = crypto.randomBytes(16).toString("hex");
   const redirectUri = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.REDIRECT_URI}&response_type=code&scope=openid%20email%20profile&state=${state}`;
   res.cookie('state', state);
   res.redirect(redirectUri);
 });
 
-router.get("/callback", async (req, res, next) => {
+router.get("/callback", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { code, state: stateFromqQuery } = req.query;
+    const { code, state: stateFromqQuery } = req.query as { code?: string; state?: string };
     const stateFromCookie = req.cookies['state'];
 
     if (!stateFromCookie || stateFromCookie !== stateFromqQuery) {
@@ -111,10 +102,10 @@ router.get("/callback", async (req, res, next) => {
     }
 
     const body = new URLSearchParams({
-      code,
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-      redirect_uri: process.env.REDIRECT_URI,
+      code: code!,
+      client_id: process.env.CLIENT_ID!,
+      client_secret: process.env.CLIENT_SECRET!,
+      redirect_uri: process.env.REDIRECT_URI!,
       grant_type: "authorization_code",
     });
 
@@ -148,7 +139,7 @@ router.get("/callback", async (req, res, next) => {
     }
 
     const userInfo = await userInfoResponse.json();
-    req.session.user = userInfo;
+    req.session.user = userInfo.name;
     res.status(200).json({ user: userInfo });
 
   } catch (error) {
@@ -156,12 +147,12 @@ router.get("/callback", async (req, res, next) => {
   }
 });
 
-router.get("/protected-google", authenticationSession, (req, res, next) => {
+router.get("/protected-google", authenticationSession, (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.session.user) {
       return res.redirect('/authenticate');
     }
-    res.status(200).json({ message: `You have accessed a protected route with user ${req.session.user.name}` });
+    res.status(200).json({ message: `You have accessed a protected route with user ${req.session.user}` });
   } catch (error) {
     next(error);
   }

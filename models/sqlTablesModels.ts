@@ -1,5 +1,13 @@
 import { DataTypes, Model } from "sequelize";
-import type { Optional } from "sequelize";
+import type {
+  CreationOptional,
+  HasManyAddAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyRemoveAssociationMixin,
+  NonAttribute,
+  Optional,
+} from "sequelize";
 import sequelize from "../utils/dbConnection.ts";
 
 interface GetAge {
@@ -22,119 +30,139 @@ const getAge: GetAge = (dateOfBirth) => {
 };
 
 interface AuthorAttributes {
-    id?: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    dateOfBirth?: Date;
-    //calculated fields
-    fullName?: string;
-    age?: number;
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  dateOfBirth: Date;
+  //calculated fields
+  fullName?: string;
+  age?: number;
 }
 
-interface AuthorCreationAttributes extends Optional<AuthorAttributes, 'id'> {}
+export interface CreateUpdateAuthorAttributes extends Omit<AuthorAttributes, "id" | "fullName" | "age"> {
+  biography?: string;
+}
 
-class Author extends Model<AuthorAttributes, AuthorCreationAttributes> implements AuthorAttributes {
-    public firstName!: string;
-    public lastName!: string;
-    public email!: string;
-    public dateOfBirth?: Date;
-    public fullName?: string; // Add fullName property
+interface AuthorCreationAttributes extends Optional<AuthorAttributes, "id"> {}
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
+class Author
+  extends Model<AuthorAttributes, AuthorCreationAttributes>
+  implements AuthorAttributes
+{
+  declare id: CreationOptional<number>;
+  declare firstName: string;
+  declare lastName: string;
+  declare email: string;
+  declare dateOfBirth: Date;
+  declare fullName?: string;
+  declare age?: number;
+
+  //books association
+  declare readonly books?: NonAttribute<Book[]>;
+
+  // timestamps!
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 }
 
 Author.init(
-    {
-        firstName: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: { msg: "First name must not be empty" },
-                notNull: { msg: "First name is required." },
-            },
-        },
-        lastName: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: { msg: "Last name must not be empty" },
-                notNull: { msg: "Last name is required." },
-            },
-        },
-        fullName: {
-            type: DataTypes.VIRTUAL,
-            get(): string { // Specify the return type as string
-                return `${this.dataValues.firstName} ${this.dataValues.lastName}`;
-            },
-        },
-        email: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: { name: "unique_email", msg: "This email address already exists." },
-            validate: {
-                isEmail: { msg: "Invalid email address." },
-                notEmpty: { msg: "Email must not be blank." },
-                notNull: { msg: "Email is required." },
-            },
-        },
-        dateOfBirth: {
-            type: DataTypes.DATEONLY,
-            allowNull: false,
-            validate: {
-                notNull: { msg: "Date of birth is required." },
-                isDate: { msg: "Date of birth must be a valid date.", args: true },
-                isAdult(value: Date) {
-                  const age: number = getAge(value);
-                  if (age < 10) {
-                    throw new Error("Author must be at least 10 years old.");
-                  }
-                },
-            },
-        },
-        age: {
-            type: DataTypes.VIRTUAL,
-            get() {
-                if (this.dataValues.dateOfBirth) {
-                    return getAge(this.dataValues.dateOfBirth);
-                }
-                return null;
-            },
-        },
+  {
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: "First name must not be empty" },
+        notNull: { msg: "First name is required." },
+      },
     },
-    {
-        sequelize,
-        timestamps: true,
-        paranoid: true,
-        deletedAt: "deletedAt",
-        hooks: {
-            beforeCreate: (author, options) => {
-                console.log(`Creating author: ${author.dataValues.fullName}`);
-            },
-            beforeDestroy: (author, options) => {
-                console.log(`Deleting author: ${author.dataValues.fullName}`);
-            }
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: "Last name must not be empty" },
+        notNull: { msg: "Last name is required." },
+      },
+    },
+    fullName: {
+      type: DataTypes.VIRTUAL,
+      get(): string {
+        // Specify the return type as string
+        return `${this.dataValues.firstName} ${this.dataValues.lastName}`;
+      },
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: {
+        name: "unique_email",
+        msg: "This email address already exists.",
+      },
+      validate: {
+        isEmail: { msg: "Invalid email address." },
+        notEmpty: { msg: "Email must not be blank." },
+        notNull: { msg: "Email is required." },
+      },
+    },
+    dateOfBirth: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      validate: {
+        notNull: { msg: "Date of birth is required." },
+        isDate: { msg: "Date of birth must be a valid date.", args: true },
+        isAdult(value: Date) {
+          const age: number = getAge(value);
+          if (age < 10) {
+            throw new Error("Author must be at least 10 years old.");
+          }
         },
-    }
+      },
+    },
+    age: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        if (this.dataValues.dateOfBirth) {
+          return getAge(this.dataValues.dateOfBirth);
+        }
+        return null;
+      },
+    },
+  },
+  {
+    sequelize,
+    timestamps: true,
+    paranoid: true,
+    deletedAt: "deletedAt",
+    hooks: {
+      beforeCreate: (author: Author) => {
+        console.log(`Creating author: ${author.dataValues.fullName}`);
+      },
+      beforeDestroy: (author: Author) => {
+        console.log(`Deleting author: ${author.dataValues.fullName}`);
+      },
+    },
+  }
 );
 
 interface ProfileAttributes {
-    id?: number;
-    biography?: string;
-    authorId?: number;
+  id?: number;
+  biography?: string;
+  authorId?: number;
 }
 
-interface ProfileCreationAttributes extends Optional<ProfileAttributes, 'id'> {}
+interface ProfileCreationAttributes extends Optional<ProfileAttributes, "id"> {}
 
-class Profile extends Model<ProfileAttributes, ProfileCreationAttributes> implements ProfileAttributes {
-    public biography?: string;
-    public authorId?: number;
+class Profile
+  extends Model<ProfileAttributes, ProfileCreationAttributes>
+  implements ProfileAttributes
+{
+  declare id: CreationOptional<number>;
+  declare biography: string;
+  declare authorId?: number;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
+  // timestamps!
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 }
 
 // Profile model
@@ -152,27 +180,41 @@ Profile.init(
 );
 
 interface BookAttributes {
-    id?: number;
-    title: string;
-    publicationYear?: number;
-    authorId?: number;
+  id?: number;
+  title: string;
+  publicationYear?: number;
+  authorId?: number;
 }
 
-interface BookCreationAttributes extends Optional<BookAttributes, 'id'> {}
+export interface CreateUpdateBookAttributes extends Omit<BookAttributes, "id"> {
+  shelfIds?: number[];
+}
 
-class Book extends Model<BookAttributes, BookCreationAttributes> implements BookAttributes {
-    public title!: string;
-    public publicationYear?: number;
-    public authorId?: number;
+interface BookCreationAttributes extends Optional<BookAttributes, "id"> {}
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
+class Book
+  extends Model<BookAttributes, BookCreationAttributes>
+  implements BookAttributes
+{
+  declare id: CreationOptional<number>;
+  declare title: string;
+  declare publicationYear?: number;
+  declare authorId?: number;
 
-    //association methods for shelves
-    declare getShelves: () => Promise<Shelf[]>;
-    declare addShelves: (shelves: Shelf[]) => Promise<void>;
-    declare removeShelves: (shelves: Shelf[]) => Promise<void>;
+  // timestamps!
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
+
+  //shelves association
+  declare readonly shelves?: NonAttribute<Shelf[]>;
+
+  //association methods for shelves
+  declare getShelves: HasManyGetAssociationsMixin<Shelf>;
+  declare addShelves: HasManyAddAssociationMixin<Shelf[], number>;
+  declare removeShelf: HasManyRemoveAssociationMixin<Shelf, number>;
+  declare removeShelves: HasManyRemoveAssociationMixin<Shelf[], number>;
+  declare hasShelf: HasManyHasAssociationMixin<Shelf, number>;
+  declare setShelves: HasManyAddAssociationMixin<Shelf[], number>;
 }
 
 // Book model
@@ -204,18 +246,22 @@ Book.init(
 );
 
 interface ShelfAttributes {
-    id?: number;
-    name: string;
+  id?: number;
+  name: string;
 }
 
-interface ShelfCreationAttributes extends Optional<ShelfAttributes, 'id'> {}
+interface ShelfCreationAttributes extends Optional<ShelfAttributes, "id"> {}
 
-class Shelf extends Model<ShelfAttributes, ShelfCreationAttributes> implements ShelfAttributes {
-    public name!: string;
+class Shelf
+  extends Model<ShelfAttributes, ShelfCreationAttributes>
+  implements ShelfAttributes
+{
+  declare id: number;
+  declare name: string;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
+  // timestamps!
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 }
 
 // Shelf model
