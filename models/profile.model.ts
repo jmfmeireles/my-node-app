@@ -41,4 +41,4 @@ Profile.init(
   }
 );
 
-export { Profile, type ProfileCreationAttributes };
+export { Profile, type ProfileCreationAttributes, type ProfileAttributes };

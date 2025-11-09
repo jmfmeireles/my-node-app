@@ -1,13 +1,13 @@
-import express, {type  Request, type Response, type NextFunction } from 'express';
-import { ValidationError } from 'sequelize';
-import sequelize from './config/db.ts';
-import commentsRouter from './routes/comments.ts';
-import moviesRouter from './routes/movies.ts';
-import authorsRouter from './routes/authors.ts';
-import booksRouter from './routes/books.ts';
-import authRouter from './routes/auth.ts';
+import express from 'express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import sequelize from './config/db.ts';
+import commentsRouter from './routes/comments.route.ts';
+import moviesRouter from './routes/movies.route.ts';
+import authorsRouter from './routes/authors.route.ts';
+import booksRouter from './routes/books.route.ts';
+import authRouter from './routes/auth.route.ts';
+import { errorMiddleware } from './middlewares/error.middleware.ts';
 
 const app = express();
 
@@ -27,36 +27,7 @@ app.use('/authors', authorsRouter);
 app.use('/books', booksRouter);
 app.use('/auth', authRouter);
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-
-  if (err instanceof ValidationError) {
-    return res.status(400).json({
-      error: {
-        message: "Validation error",
-        details: err.errors.map(e => e.message)
-      }
-    });
-  }
-
-  // Handle generic 404 errors
-  if (err.status === 404) {
-    return res.status(404).json({
-      error: {
-        message: "Resource not found",
-        details: err.message || null,
-      },
-    });
-  }
-
-  // Default to 500 Server Error for unhandled errors
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Internal Server Error',
-      details: err.details || null,
-    },
-  });
-});
+app.use(errorMiddleware);
 
 sequelize.sync({ force: true }).then(() => {
   app.listen(3000, () => {

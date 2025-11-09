@@ -2,7 +2,6 @@ import { DataTypes, Model, type Optional, type CreationOptional, type NonAttribu
 import sequelize from "../config/db.ts";
 import { getAge } from "../utils/ageCalculator.ts";
 import { Book } from "./book.model.ts";
-import { Shelf } from "./shelf.model.ts";
 import { Profile } from "./profile.model.ts";
 
 interface AuthorAttributes {
@@ -40,6 +39,12 @@ interface AuthorAttributes {
     // timestamps!
     declare readonly createdAt: CreationOptional<Date>;
     declare readonly updatedAt: CreationOptional<Date>;
+
+    //methods
+    declare bulkCreate: (Model<AuthorAttributes, AuthorCreationAttributes> & {
+      (records: CreateUpdateAuthorAttributes[]): Promise<Author[]>;
+    });
+    declare init: typeof Model.init;
   }
 
   Author.init(
