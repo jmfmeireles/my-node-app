@@ -9,10 +9,24 @@ jest.mock("../services/comments.service.ts", () => ({
   deleteComment: jest.fn(),
 }));
 
+jest.mock("../services/movies.service.ts", () => ({
+  fetchMovieByTitle: jest.fn(),
+}));
+
+jest.mock("../services/sse.service.ts", () => ({
+  sseService: {
+    broadcast: jest.fn(),
+  },
+}));
+
 import * as CommentsController from "./comments.controller.ts";
 import * as CommentService from "../services/comments.service.ts";
+import * as MoviesService from "../services/movies.service.ts";
+import { sseService } from "../services/sse.service.ts";
 
 const mockedCommentService = CommentService as jest.Mocked<typeof CommentService>;
+const mockedMoviesService = MoviesService as jest.Mocked<typeof MoviesService>;
+const mockedSSEService = sseService as jest.Mocked<typeof sseService>;
 
 describe("Comments Controller", () => {
   let mockReq: Partial<Request>;
@@ -152,23 +166,52 @@ describe("Comments Controller", () => {
   });
 
   describe("createComment", () => {
-    it("should create a comment and return 201", async () => {
-      const commentData = { text: "New Comment", name: "User", email: "user@test.com" };
-      const createdComment = { _id: "1", ...commentData };
+    it("should create a comment and return 201 with SSE broadcast", async () => {
+      const commentData = {
+        text: "New Comment",
+        name: "User",
+        email: "user@test.com",
+        movieTitle: "The Matrix",
+      };
+      const movie = { _id: "movie123", title: "The Matrix" };
+      const createdComment = { _id: "1", ...commentData, movieId: "movie123" };
 
       mockReq.body = commentData;
+      mockedMoviesService.fetchMovieByTitle.mockResolvedValue(movie as any);
       mockedCommentService.createComment.mockResolvedValue(createdComment as any);
 
       await CommentsController.createComment(mockReq as Request, mockRes as Response, mockNext);
 
-      expect(mockedCommentService.createComment).toHaveBeenCalledWith(commentData);
+      expect(mockedMoviesService.fetchMovieByTitle).toHaveBeenCalledWith("The Matrix");
+      expect(mockedCommentService.createComment).toHaveBeenCalledWith({
+        ...commentData,
+        movie_id: "movie123",
+      });
+      expect(mockedSSEService.broadcast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "new_comment",
+          data: createdComment,
+        }),
+        "comments"
+      );
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith(createdComment);
     });
 
+    it("should return 404 when movie not found", async () => {
+      mockReq.body = { movieTitle: "Unknown Movie", text: "Test", name: "User", email: "test@test.com" };
+      mockedMoviesService.fetchMovieByTitle.mockResolvedValue(null);
+
+      await CommentsController.createComment(mockReq as Request, mockRes as Response, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: "Movie not found for the comment" });
+    });
+
     it("should call next with error on failure", async () => {
       const error = new Error("Create failed");
-      mockedCommentService.createComment.mockRejectedValue(error);
+      mockReq.body = { movieTitle: "The Matrix" };
+      mockedMoviesService.fetchMovieByTitle.mockRejectedValue(error);
 
       await CommentsController.createComment(mockReq as Request, mockRes as Response, mockNext);
 
@@ -226,7 +269,7 @@ describe("Comments Controller", () => {
   });
 
   describe("deleteComment", () => {
-    it("should delete comment and return 200 with message", async () => {
+    it("should delete comment and return 200 with message and SSE broadcast", async () => {
       const message = "Comment deleted successfully";
       mockReq.params = { id: "1" };
       mockedCommentService.deleteComment.mockResolvedValue(message);
@@ -238,6 +281,13 @@ describe("Comments Controller", () => {
       );
 
       expect(mockedCommentService.deleteComment).toHaveBeenCalledWith("1");
+      expect(mockedSSEService.broadcast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "delete_comment",
+          data: { commentId: "1" },
+        }),
+        "comments"
+      );
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({ message });
     });

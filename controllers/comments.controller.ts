@@ -46,16 +46,20 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
       return res.status(404).json({ error: "Movie not found for the comment" });
     }
 
+
     const newComment = await CommentService.createComment({
       ...req.body,
-      movieId: movie._id,
+      movie_id: movie._id.toString(),
     });
 
     // Broadcast new comment via SSE
     sseService.broadcast(
       {
         type: "new_comment",
-        data: newComment,
+        data: {
+          ...newComment,
+          movieTitle: movie.title,
+        },
         timestamp: new Date().toISOString(),
       },
       "comments"
@@ -88,6 +92,17 @@ export const deleteComment = async (
 ) => {
   try {
     const message = await CommentService.deleteComment(req.params.id);
+    
+    // Broadcast comment deletion via SSE
+    sseService.broadcast(
+      {
+        type: "delete_comment",
+        data: { commentId: req.params.id },
+        timestamp: new Date().toISOString(),
+      },
+      "comments"
+    );
+    
     res.status(200).json({ message });
   } catch (error) {
     next(error);
