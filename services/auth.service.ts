@@ -1,10 +1,9 @@
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import crypto from "node:crypto";
-import type { Request } from "express";
 
 import User from "../models/user.model.ts";
 
-interface Credentials {
+export interface Credentials {
   username: string;
   password: string;
 }

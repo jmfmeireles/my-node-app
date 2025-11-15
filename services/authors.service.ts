@@ -9,7 +9,7 @@ export const createAuthor = async (data: CreateUpdateAuthorAttributes) => {
   try {
     const { biography, ...authorData } = data;
     const newAuthor = await Author.create(authorData, { transaction: t });
-    let newProfile = null;
+    let newProfile: Profile | null = null;
     if (biography) {
       newProfile = await Profile.create({ biography, authorId: newAuthor.id }, { transaction: t });
     }
