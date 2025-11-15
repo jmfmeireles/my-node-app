@@ -19,7 +19,7 @@ interface AuthorAttributes {
     biography?: string;
   }
   
-  interface AuthorCreationAttributes extends Optional<AuthorAttributes, "id"> {}
+  type AuthorCreationAttributes = Optional<AuthorAttributes, "id">;
   
   class Author
     extends Model<AuthorAttributes, AuthorCreationAttributes>

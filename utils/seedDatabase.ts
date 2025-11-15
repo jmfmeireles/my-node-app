@@ -21,20 +21,20 @@ const seedDatabase = async () => {
 
     // Seed profiles and associate them with authors
     const profiles = await Profile.bulkCreate([
-      { biography: 'John is a seasoned writer with a passion for adventure.', authorId: authors[0]?.dataValues.id! },
-      { biography: 'Jane specializes in mystery novels and thrillers.', authorId: authors[1]?.dataValues.id! },
-      { biography: 'Emily writes about science and exploration.', authorId: authors[2]?.dataValues.id! },
+      { biography: 'John is a seasoned writer with a passion for adventure.', authorId: authors[0]!.dataValues.id },
+      { biography: 'Jane specializes in mystery novels and thrillers.', authorId: authors[1]!.dataValues.id },
+      { biography: 'Emily writes about science and exploration.', authorId: authors[2]!.dataValues.id },
     ]);
     console.log('Profiles seeded:', profiles.map(profile => profile.toJSON()));
 
     // Seed books and associate them with authors
     const books = await Book.bulkCreate([
-      { title: 'The Great Adventure', publicationYear: 2015, authorId: authors[0]?.dataValues.id! },
-      { title: 'Mystery of the Lost City', publicationYear: 2010, authorId: authors[0]?.dataValues.id!},
-      { title: 'Adventures in Coding', publicationYear: 2020, authorId: authors[1]?.dataValues.id! },
-      { title: 'The Last Frontier', publicationYear: 2005, authorId: authors[1]?.dataValues.id! },
-      { title: 'Exploring the Cosmos', publicationYear: 2022, authorId: authors[2]?.dataValues.id! },
-      { title: 'Ancient Civilizations', publicationYear: 2018, authorId: authors[2]?.dataValues.id! },
+      { title: 'The Great Adventure', publicationYear: 2015, authorId: authors[0]!.dataValues.id },
+      { title: 'Mystery of the Lost City', publicationYear: 2010, authorId: authors[0]!.dataValues.id },
+      { title: 'Adventures in Coding', publicationYear: 2020, authorId: authors[1]!.dataValues.id },
+      { title: 'The Last Frontier', publicationYear: 2005, authorId: authors[1]!.dataValues.id },
+      { title: 'Exploring the Cosmos', publicationYear: 2022, authorId: authors[2]!.dataValues.id },
+      { title: 'Ancient Civilizations', publicationYear: 2018, authorId: authors[2]!.dataValues.id },
     ]);
     console.log('Books seeded:', books.map(book => book.toJSON()));
 

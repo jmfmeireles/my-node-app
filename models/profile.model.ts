@@ -12,7 +12,7 @@ interface ProfileAttributes {
   authorId?: number;
 }
 
-interface ProfileCreationAttributes extends Optional<ProfileAttributes, "id"> {}
+type ProfileCreationAttributes = Optional<ProfileAttributes, "id">;
 
 class Profile
   extends Model<ProfileAttributes, ProfileCreationAttributes>

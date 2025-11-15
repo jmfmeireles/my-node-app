@@ -1,7 +1,7 @@
 import * as supertest from 'supertest';
 import * as express from 'express';
 
-// @ts-ignore - supertest exports function directly
+// @ts-expect-error - supertest exports function directly
 const request = supertest as unknown as typeof supertest.default;
 
 jest.mock('../controllers/authors.controller.ts', () => ({
@@ -37,7 +37,7 @@ describe('Authors Routes', () => {
         res.status(200).json({ id: 1, firstName: 'John' });
       });
 
-      const response = await request(app)
+      await request(app)
         .post('/authors')
         .send({ firstName: 'John', lastName: 'Doe' });
 

@@ -1,7 +1,7 @@
 import * as supertest from 'supertest';
 import * as express from 'express';
 
-// @ts-ignore - supertest exports function directly
+// @ts-expect-error - supertest exports function directly
 const request = supertest as unknown as typeof supertest.default;
 
 jest.mock('../controllers/movies.controller.ts', () => ({

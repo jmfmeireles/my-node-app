@@ -6,7 +6,7 @@ interface ShelfAttributes {
     name: string;
   }
   
-  interface ShelfCreationAttributes extends Optional<ShelfAttributes, "id"> {}
+  type ShelfCreationAttributes = Optional<ShelfAttributes, "id">;
   
   class Shelf
     extends Model<ShelfAttributes, ShelfCreationAttributes>

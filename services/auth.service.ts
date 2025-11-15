@@ -1,5 +1,7 @@
 import * as bcrypt from "bcrypt";
 import crypto from "node:crypto";
+import type { Response, NextFunction } from 'express';
+import type { Session } from 'express-session';
 
 import User from "../models/user.model.ts";
 
@@ -27,8 +29,8 @@ export const loginUser = async ({username, password}: Credentials) => {
   return { message: "Login successful", username: user.username };
 };
 
-export const logoutUser = (session: any, res: any, next: any) => {
-  session.destroy((err: Error) => {
+export const logoutUser = (session: Session, res: Response, next: NextFunction) => {
+  session.destroy((err) => {
     if (err) return next(err);
     res.clearCookie("connect.sid");
     res.status(200).json({ message: "Logout successful" });
@@ -42,7 +44,16 @@ export const getGoogleAuthUrl = () => {
   return { url, state };
 };
 
-export const handleGoogleCallback = async (query: any, cookies: any, session: any) => {
+interface GoogleCallbackQuery {
+  code?: string;
+  state?: string;
+}
+
+interface Cookies {
+  [key: string]: string | undefined;
+}
+
+export const handleGoogleCallback = async (query: GoogleCallbackQuery, cookies: Cookies, session: Session) => {
   const { code, state: stateFromQuery } = query;
   const stateFromCookie = cookies["state"];
   if (!stateFromCookie || stateFromCookie !== stateFromQuery) {

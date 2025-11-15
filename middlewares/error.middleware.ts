@@ -1,8 +1,13 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 import { ValidationError } from "sequelize";
 
+interface AppError extends Error {
+  status?: number;
+  details?: unknown;
+}
+
 export const errorMiddleware = (
-  err: any,
+  err: AppError,
   req: Request,
   res: Response,
 ) => {

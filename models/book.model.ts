@@ -23,7 +23,7 @@ interface CreateUpdateBookAttributes extends Omit<BookAttributes, "id"> {
   shelfIds?: number[];
 }
 
-interface BookCreationAttributes extends Optional<BookAttributes, "id"> {}
+type BookCreationAttributes = Optional<BookAttributes, "id">;
 
 class Book
   extends Model<BookAttributes, BookCreationAttributes>

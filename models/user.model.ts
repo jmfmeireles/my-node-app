@@ -8,7 +8,7 @@ interface UserAttributes {
     password: string;
 }
 
-export interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
+export type UserCreationAttributes = Optional<UserAttributes, "id">;
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public id!: number;
