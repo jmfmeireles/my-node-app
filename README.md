@@ -13,8 +13,8 @@ This application serves as a learning project for Node.js and Express, showcasin
 1. **Create a MongoDB database**: Here I am using Atlas to create it online. For more information you can refer to the next section
 2. **Install Dependencies**: Run `npm install` to install all necessary dependencies defined in `package.json`.
 3. **Environment Variables**: Create a `.env` file for storing environment variables, such as database connection strings and secret keys, which should not be hard-coded in the application.
-4. **Seed local database**: You can populate the local SQL database by running `node utils/seedDatabase.js`. This is done having into account the models developed on `models/sqlTablesModels`
-5. **Start Application**: Use `npm run dev` to start the application in development mode, typically with features like hot reloading for easier development.
+4. **Seed local database**: You can populate the local SQL database by running `npm run seed`. This will create sample data for authors, books, and shelves.
+5. **Start Application**: Use `npm run dev` to start the application in development mode, with automatic restart on file changes and debugging enabled.
 
 ## MongoDB Connection
 Instructions are provided to connect to a MongoDB Atlas database, which is a cloud-based NoSQL database service. This involves copying a connection string and replacing placeholders with actual credentials. For detailed instructions on how to create and connect to a MongoDB Atlas database, please refer to the official MongoDB documentation: [Create and Connect to a MongoDB Atlas Cluster](https://docs.atlas.mongodb.com/getting-started/).
@@ -34,5 +34,10 @@ There are several endpoints that you can test inside the following routes:
 **comments**: Handles CRUD operations for comments in a NoSQL database.
 **movies**: Manages CRUD operations for movie records in a NoSQL database.
 
-## Unit tests
-WIP
+## Unit Tests
+This project includes comprehensive unit tests for all service layer functions.
+
+### Running Tests
+- **Run all tests**: `npm test`
+- **Run tests in watch mode**: `npm run test:watch`
+- **Run tests with coverage report**: `npm run test:coverage`
