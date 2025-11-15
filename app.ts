@@ -1,6 +1,7 @@
 import express from "express";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import { createServer } from "http";
 import sequelize from "./config/db.ts";
 import commentsRouter from "./routes/comments.route.ts";
 import moviesRouter from "./routes/movies.route.ts";
@@ -9,8 +10,10 @@ import booksRouter from "./routes/books.route.ts";
 import authRouter from "./routes/auth.route.ts";
 import sseRouter from "./routes/sse.route.ts";
 import { errorMiddleware } from "./middlewares/error.middleware.ts";
+import { websocketService } from "./services/websocket.service.ts";
 
 const app = express();
+const server = createServer(app);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -38,8 +41,12 @@ app.use(errorMiddleware);
 sequelize
   .sync({ force: true })
   .then(() => {
-    app.listen(3000, () => {
+    // Initialize WebSocket server
+    websocketService.initialize(server);
+
+    server.listen(3000, () => {
       console.log("Server is running on port 3000");
+      console.log("WebSocket server available at ws://localhost:3000/ws");
     });
   })
   .catch((error) => console.error("Unable to start the server:", error));
