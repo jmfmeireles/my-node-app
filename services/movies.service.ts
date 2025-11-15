@@ -29,6 +29,12 @@ export const fetchMovieById = async (
   return movie;
 };
 
+export const fetchMovieByTitle = async (title: string): Promise<Movie | null> => {
+  return (await db?.collection("movies").findOne({ 
+    title: { $regex: new RegExp(`^${title}$`, 'i') }
+  })) as Movie | null;
+};
+
 export const createMovie = async (newMovie: Movie): Promise<Movie | null> => {
   const result = await db?.collection("movies").insertOne(newMovie);
   if (!result?.insertedId) throw new Error("Failed to create movie");

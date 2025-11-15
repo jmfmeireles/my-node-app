@@ -7,6 +7,7 @@ import moviesRouter from "./routes/movies.route.ts";
 import authorsRouter from "./routes/authors.route.ts";
 import booksRouter from "./routes/books.route.ts";
 import authRouter from "./routes/auth.route.ts";
+import sseRouter from "./routes/sse.route.ts";
 import { errorMiddleware } from "./middlewares/error.middleware.ts";
 
 const app = express();
@@ -27,6 +28,10 @@ app.use("/movies", moviesRouter);
 app.use("/authors", authorsRouter);
 app.use("/books", booksRouter);
 app.use("/auth", authRouter);
+app.use("/sse", sseRouter);
+
+// Serve static demo page
+app.use(express.static("public"));
 
 app.use(errorMiddleware);
 

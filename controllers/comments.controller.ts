@@ -1,5 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import * as CommentService from "../services/comments.service.ts";
+import * as MoviesService from "../services/movies.service.ts";
+import type { Movie } from "../models/movie.model.ts";
+import { sseService } from "../services/sse.service.ts";
 
 export const getAllComments = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -37,7 +40,27 @@ export const getCommentById = async (
 
 export const createComment = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const newComment = await CommentService.createComment(req.body);
+    //get movie id from body
+    const movie: Movie | null = await MoviesService.fetchMovieByTitle(req.body.movieTitle);
+    if (!movie) {
+      return res.status(404).json({ error: "Movie not found for the comment" });
+    }
+
+    const newComment = await CommentService.createComment({
+      ...req.body,
+      movieId: movie._id,
+    });
+
+    // Broadcast new comment via SSE
+    sseService.broadcast(
+      {
+        type: "new_comment",
+        data: newComment,
+        timestamp: new Date().toISOString(),
+      },
+      "comments"
+    );
+
     res.status(201).json(newComment);
   } catch (error) {
     next(error);

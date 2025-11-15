@@ -39,6 +39,37 @@ There are several endpoints that you can test inside the following routes:
 **books**: Manages CRUD operations for book records in a SQL database.
 **comments**: Handles CRUD operations for comments in a NoSQL database.
 **movies**: Manages CRUD operations for movie records in a NoSQL database.
+**sse**: Provides real-time Server-Sent Events (SSE) for live updates.
+
+## Real-time Review Feed (SSE Demo)
+
+This application includes a real-time review feed powered by Server-Sent Events (SSE).
+
+### Features
+
+- **Live Updates**: See new reviews appear instantly as they're submitted
+- **Active Connection Monitoring**: Track the number of active SSE connections
+- **Beautiful UI**: Modern, responsive web interface for submitting and viewing reviews
+- **Topic-based Broadcasting**: Subscribe to specific event topics (e.g., "comments", "all")
+
+### How to Use
+
+1. Start the application: `npm run dev`
+2. Open your browser and navigate to: `http://localhost:3000`
+3. You'll see the real-time review feed interface with:
+   - A form to submit new reviews
+   - A live feed showing reviews as they're posted
+   - Connection status indicator
+   - Real-time statistics
+
+### SSE Endpoints
+
+- **GET /sse/events**: Connect to SSE stream (supports `?topics=comments,all` query parameter)
+- **GET /sse/stats**: Get current SSE connection statistics
+
+### Testing SSE
+
+Open multiple browser tabs to `http://localhost:3000` and submit reviews from different tabs. You'll see the reviews appear in real-time across all connected clients!
 
 ## Unit Tests
 
