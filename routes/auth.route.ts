@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import {
   register,
@@ -7,7 +6,7 @@ import {
   protectedRoute,
   authenticateGoogle,
   googleCallback,
-  protectedGoogle
+  protectedGoogle,
 } from "../controllers/auth.controller.ts";
 import { authenticationSession } from "../middlewares/session.middleware.ts";
 

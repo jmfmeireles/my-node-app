@@ -1,7 +1,7 @@
 import * as bcrypt from "bcrypt";
 import crypto from "node:crypto";
-import type { Response, NextFunction } from 'express';
-import type { Session } from 'express-session';
+import type { Response, NextFunction } from "express";
+import type { Session } from "express-session";
 
 import User from "../models/user.model.ts";
 
@@ -19,7 +19,7 @@ export const registerUser = async ({ username, password }: Credentials) => {
   return { message: "User registered successfully", userId: newUser.id };
 };
 
-export const loginUser = async ({username, password}: Credentials) => {
+export const loginUser = async ({ username, password }: Credentials) => {
   const user = await User.findOne({ where: { username }, raw: true });
   if (!user) throw new Error("User not found");
 
@@ -53,7 +53,11 @@ interface Cookies {
   [key: string]: string | undefined;
 }
 
-export const handleGoogleCallback = async (query: GoogleCallbackQuery, cookies: Cookies, session: Session) => {
+export const handleGoogleCallback = async (
+  query: GoogleCallbackQuery,
+  cookies: Cookies,
+  session: Session
+) => {
   const { code, state: stateFromQuery } = query;
   const stateFromCookie = cookies["state"];
   if (!stateFromCookie || stateFromCookie !== stateFromQuery) {

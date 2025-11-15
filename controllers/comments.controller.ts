@@ -21,7 +21,11 @@ export const getPaginatedComments = async (req: Request, res: Response, next: Ne
   }
 };
 
-export const getCommentById = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const getCommentById = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const comment = await CommentService.fetchCommentById(req.params.id);
     if (!comment) return res.status(404).json({ error: "Comment not found" });
@@ -40,7 +44,11 @@ export const createComment = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateComment = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const updateComment = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const updatedComment = await CommentService.updateComment(req.params.id, req.body);
     if (!updatedComment) return res.status(404).json({ error: "Comment not found" });
@@ -50,7 +58,11 @@ export const updateComment = async (req: Request<{ id: string }>, res: Response,
   }
 };
 
-export const deleteComment = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const deleteComment = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const message = await CommentService.deleteComment(req.params.id);
     res.status(200).json({ message });

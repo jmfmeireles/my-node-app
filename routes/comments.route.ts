@@ -5,7 +5,7 @@ import {
   getCommentById,
   createComment,
   updateComment,
-  deleteComment
+  deleteComment,
 } from "../controllers/comments.controller.ts";
 
 const router = Router();

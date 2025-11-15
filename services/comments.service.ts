@@ -21,15 +21,20 @@ export const createComment = async (newComment: Comment): Promise<Comment | null
     email: newComment.email,
     movie_id: newComment.movie_id,
     text: newComment.text,
-    date: new Date().toISOString()
+    date: new Date().toISOString(),
   });
 
   if (!result?.insertedId) throw new Error("Failed to create comment");
   return (await db?.collection("comments").findOne({ _id: result.insertedId })) as Comment | null;
 };
 
-export const updateComment = async (id: string, updatedData: Partial<Comment>): Promise<Comment | null> => {
-  const result = await db?.collection("comments").updateOne({ _id: new ObjectId(id) }, { $set: updatedData });
+export const updateComment = async (
+  id: string,
+  updatedData: Partial<Comment>
+): Promise<Comment | null> => {
+  const result = await db
+    ?.collection("comments")
+    .updateOne({ _id: new ObjectId(id) }, { $set: updatedData });
   if (result?.matchedCount === 0) return null;
   return (await db?.collection("comments").findOne({ _id: new ObjectId(id) })) as Comment | null;
 };

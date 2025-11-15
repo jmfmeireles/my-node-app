@@ -25,10 +25,7 @@ interface CreateUpdateBookAttributes extends Omit<BookAttributes, "id"> {
 
 type BookCreationAttributes = Optional<BookAttributes, "id">;
 
-class Book
-  extends Model<BookAttributes, BookCreationAttributes>
-  implements BookAttributes
-{
+class Book extends Model<BookAttributes, BookCreationAttributes> implements BookAttributes {
   declare id: CreationOptional<number>;
   declare title: string;
   declare publicationYear?: number;

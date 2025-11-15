@@ -6,11 +6,7 @@ interface AppError extends Error {
   details?: unknown;
 }
 
-export const errorMiddleware = (
-  err: AppError,
-  req: Request,
-  res: Response,
-) => {
+export const errorMiddleware = (err: AppError, req: Request, res: Response) => {
   console.error(err.stack);
 
   if (err instanceof ValidationError) {

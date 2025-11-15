@@ -11,12 +11,18 @@ export const fetchPaginatedMovies = async (page: number, limit: number): Promise
   return (await db?.collection("movies").find({}).skip(skip).limit(limit).toArray()) as Movie[];
 };
 
-export const fetchMovieById = async (id: string, includeComments: boolean): Promise<Movie | null> => {
+export const fetchMovieById = async (
+  id: string,
+  includeComments: boolean
+): Promise<Movie | null> => {
   const movie = (await db?.collection("movies").findOne({ _id: new ObjectId(id) })) as Movie | null;
   if (!movie) return null;
 
   if (includeComments) {
-    const comments: Comment[] = (await db?.collection("comments").find({ movie_id: new ObjectId(id) }).toArray()) as Comment[];
+    const comments: Comment[] = (await db
+      ?.collection("comments")
+      .find({ movie_id: new ObjectId(id) })
+      .toArray()) as Comment[];
     movie.comments = comments;
   }
 
@@ -29,8 +35,13 @@ export const createMovie = async (newMovie: Movie): Promise<Movie | null> => {
   return (await db?.collection("movies").findOne({ _id: result.insertedId })) as Movie | null;
 };
 
-export const updateMovie = async (id: string, updatedData: Partial<Movie>): Promise<Movie | null> => {
-  const result = await db?.collection("movies").updateOne({ _id: new ObjectId(id) }, { $set: updatedData });
+export const updateMovie = async (
+  id: string,
+  updatedData: Partial<Movie>
+): Promise<Movie | null> => {
+  const result = await db
+    ?.collection("movies")
+    .updateOne({ _id: new ObjectId(id) }, { $set: updatedData });
   if (result?.matchedCount === 0) return null;
   return (await db?.collection("movies").findOne({ _id: new ObjectId(id) })) as Movie | null;
 };

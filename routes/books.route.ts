@@ -7,7 +7,7 @@ import {
   updateBook,
   deleteBook,
   removeBookFromShelf,
-  getBookShelves
+  getBookShelves,
 } from "../controllers/books.controller.ts";
 
 const router = Router();

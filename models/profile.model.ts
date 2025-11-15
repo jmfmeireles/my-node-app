@@ -1,9 +1,4 @@
-import {
-  DataTypes,
-  Model,
-  type CreationOptional,
-  type Optional,
-} from "sequelize";
+import { DataTypes, Model, type CreationOptional, type Optional } from "sequelize";
 import sequelize from "../config/db.ts";
 
 interface ProfileAttributes {

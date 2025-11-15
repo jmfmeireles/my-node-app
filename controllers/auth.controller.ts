@@ -1,11 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import * as AuthService from "../services/auth.service.ts";
 
-export const register = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await AuthService.registerUser(req.body);
     res.status(201).json(result);
@@ -14,11 +10,7 @@ export const register = async (
   }
 };
 
-export const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { message, username } = await AuthService.loginUser(req.body);
     req.session.regenerate((err: Error) => {
@@ -48,17 +40,9 @@ export const authenticateGoogle = (req: Request, res: Response) => {
   res.redirect(redirectUri.url);
 };
 
-export const googleCallback = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const googleCallback = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await AuthService.handleGoogleCallback(
-      req.query,
-      req.cookies,
-      req.session
-    );
+    const result = await AuthService.handleGoogleCallback(req.query, req.cookies, req.session);
     res.status(200).json(result);
   } catch (error) {
     next(error);

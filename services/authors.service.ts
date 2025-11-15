@@ -34,12 +34,12 @@ export const fetchAuthorById = async (id: string) => {
       "dateOfBirth",
       "age",
       "email",
-      [Sequelize.col("profile.biography"), "biography"]
+      [Sequelize.col("profile.biography"), "biography"],
     ],
     include: [
       { model: Book, as: "books", attributes: ["title", "publicationYear"] },
-      { model: Profile, as: "profile", attributes: [] }
-    ]
+      { model: Profile, as: "profile", attributes: [] },
+    ],
   });
 };
 
@@ -70,7 +70,10 @@ export const updateAuthor = async (id: string, data: CreateUpdateAuthorAttribute
 export const deleteAuthor = async (id: string) => {
   const t = await sequelize.transaction();
   try {
-    const author = await Author.findByPk(id, { include: [{ model: Book, as: "books" }], transaction: t });
+    const author = await Author.findByPk(id, {
+      include: [{ model: Book, as: "books" }],
+      transaction: t,
+    });
     if (!author) {
       await t.rollback();
       return null;
@@ -97,7 +100,7 @@ export const restoreAuthor = async (id: string) => {
     const author = await Author.findByPk(id, {
       paranoid: false,
       include: [{ model: Book, as: "books", paranoid: false }],
-      transaction: t
+      transaction: t,
     });
 
     if (!author) {

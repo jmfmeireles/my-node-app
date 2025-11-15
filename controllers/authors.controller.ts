@@ -19,7 +19,11 @@ export const getAllAuthors = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const getAuthorById = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const getAuthorById = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const author = await AuthorService.fetchAuthorById(req.params.id);
     if (!author) return res.status(404).json({ error: "Author not found" });
@@ -29,7 +33,11 @@ export const getAuthorById = async (req: Request<{ id: string }>, res: Response,
   }
 };
 
-export const updateAuthor = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const updateAuthor = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const updatedAuthor = await AuthorService.updateAuthor(req.params.id, req.body);
     if (!updatedAuthor) return res.status(404).json({ error: "Author not found" });
@@ -39,7 +47,11 @@ export const updateAuthor = async (req: Request<{ id: string }>, res: Response, 
   }
 };
 
-export const deleteAuthor = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const deleteAuthor = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const message = await AuthorService.deleteAuthor(req.params.id);
     res.status(200).json({ message });
@@ -48,7 +60,11 @@ export const deleteAuthor = async (req: Request<{ id: string }>, res: Response, 
   }
 };
 
-export const restoreAuthor = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+export const restoreAuthor = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const message = await AuthorService.restoreAuthor(req.params.id);
     res.status(200).json({ message });

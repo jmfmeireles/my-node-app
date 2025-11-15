@@ -5,7 +5,7 @@ import {
   getAuthorById,
   updateAuthor,
   deleteAuthor,
-  restoreAuthor
+  restoreAuthor,
 } from "../controllers/authors.controller.ts";
 
 const router = Router();

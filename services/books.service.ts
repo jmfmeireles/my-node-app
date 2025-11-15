@@ -17,8 +17,9 @@ export const createBook = async (data: CreateUpdateBookAttributes) => {
     const book = await Book.create(bookData, { transaction: t });
 
     if (shelfIds && shelfIds.length > 0) {
-      const shelves = (await Promise.all(shelfIds.map(id => Shelf.findByPk(id, { transaction: t }))))
-        .filter((shelf): shelf is Shelf => shelf !== null);
+      const shelves = (
+        await Promise.all(shelfIds.map((id) => Shelf.findByPk(id, { transaction: t })))
+      ).filter((shelf): shelf is Shelf => shelf !== null);
 
       if (shelves.length !== shelfIds.length) {
         await t.rollback();
@@ -64,8 +65,9 @@ export const updateBook = async (id: string, data: CreateUpdateBookAttributes) =
     await book.update(bookData, { transaction: t });
 
     if (shelfIds) {
-      const shelves = (await Promise.all(shelfIds.map(id => Shelf.findByPk(id, { transaction: t }))))
-        .filter((shelf): shelf is Shelf => shelf !== null);
+      const shelves = (
+        await Promise.all(shelfIds.map((id) => Shelf.findByPk(id, { transaction: t })))
+      ).filter((shelf): shelf is Shelf => shelf !== null);
 
       if (shelves.length !== shelfIds.length) {
         await t.rollback();
